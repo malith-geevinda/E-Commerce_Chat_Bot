@@ -1,0 +1,61 @@
+import streamlit as st
+import joblib
+import pandas as pd
+from finetech_chatbot_notebook import preprocess_text, extract_product_name, generate_response
+
+# Load trained model and data
+intent_classifier = joblib.load('model/intent_classifier.pkl')
+product_df = pd.read_csv('dataset/product_data.csv')
+conversational_df = pd.read_csv('dataset/conversational_data.csv')
+
+# Streamlit app interface configuration
+st.set_page_config(
+    page_title="FineTech Assistant",
+    page_icon="🤖",
+    layout="centered",
+    initial_sidebar_state="expanded",
+)
+
+
+
+
+col1, col2, col3 = st.columns([1,6,1])
+with col2:
+    st.title('FineTech Assistant 🤖')
+    st.write("Welcome to FineTech! Your tech shopping assistant. Ask me anything!")
+
+# Sidebar with company info and branding
+st.sidebar.title("FineTech")
+st.sidebar.image("images/1.png", width=300)
+st.sidebar.write("FineTech is your one-stop destination for all tech products. From the latest smartphones to cutting-edge laptops, we've got it all!")
+st.sidebar.write("Have questions? Ask our chatbot here or visit our [website](#)!")  # Replace # with your website link
+
+# Initialize chat history in session state
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+# Accept user input
+user_input = st.chat_input("Type your question...")
+if user_input:
+    # Add user message to chat history
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
+
+    # Generate bot response
+    response = generate_response(user_input)
+    
+    # Add bot response to chat history
+    st.session_state.chat_history.append({"role": "assistant", "content": response})
+
+# Display chat history
+for message in st.session_state.chat_history:
+    role, content = message["role"], message["content"]
+    with st.chat_message(role):
+        if role == "user":
+            st.write(f"👤 **You**: {content}")
+        else:
+            st.write(f"🤖 **FineTech Assistant**: {content}")
+
+# Footer branding
+st.write("---")
+st.write("© 2023 FineTech - Bringing technology closer to you!")
+st.write("[Products Page](#) | [Terms of Service](#)")  # Replace
